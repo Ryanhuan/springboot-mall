@@ -1,6 +1,7 @@
 package com.rui.springboot_mall.dao.Impl;
 
 
+import com.rui.springboot_mall.constant.ProductCategory;
 import com.rui.springboot_mall.dao.ProductDao;
 import com.rui.springboot_mall.dto.ProductRequest;
 import com.rui.springboot_mall.model.Product;
@@ -26,12 +27,23 @@ public class ProductDaoImpl implements ProductDao {
 
 
     @Override
-    public List<Product> getProducts() {
-        String sql ="select product_id , product_name, category, image_url, " +
+    public List<Product> getProducts(ProductCategory category,String search) {
+        String sql = "select product_id , product_name, category, image_url, " +
                 "price, stock, description, created_date, last_modified_date " +
-                "from product";
+                "from product WHERE 1=1";
 
-        Map<String,Object> map=  new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
+
+        if (category != null) {
+            sql = sql + " AND category=:category";
+            map.put("category", category.name());
+        }
+
+        if(search != null){
+            sql = sql + " AND product_name LiKE :search";
+            map.put("search", "%"+search+"%");
+
+        }
 
         List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProductRowMapper());
 
@@ -41,20 +53,20 @@ public class ProductDaoImpl implements ProductDao {
     @Override
     public Product getProductById(Integer productId) {
 
-        String sql ="select product_id , product_name, category, image_url, " +
+        String sql = "select product_id , product_name, category, image_url, " +
                 "price, stock, description, created_date, last_modified_date " +
                 "from product where product_id = :productId";
 
 
-        Map<String,Object> map=  new HashMap<>();
-        map.put("productId",productId);
+        Map<String, Object> map = new HashMap<>();
+        map.put("productId", productId);
 
 
         List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProductRowMapper());
 
-        if(productList.size()>0){
+        if (productList.size() > 0) {
             return productList.get(0);
-        }else{
+        } else {
             return null;
         }
 
@@ -68,21 +80,21 @@ public class ProductDaoImpl implements ProductDao {
                 "VALUES (:productName , :category , :imageUrl ,:price,:stock," +
                 ":description,:createdDate,:lastModifiedDate)";
 
-        Map<String,Object> map =  new HashMap<>();
-        map.put("productName",productRequest.getProductName());
-        map.put("category",productRequest.getCategory().name());
-        map.put("imageUrl",productRequest.getImageUrl());
-        map.put("price",productRequest.getPrice());
-        map.put("stock",productRequest.getStock());
-        map.put("description",productRequest.getDescription());
+        Map<String, Object> map = new HashMap<>();
+        map.put("productName", productRequest.getProductName());
+        map.put("category", productRequest.getCategory().name());
+        map.put("imageUrl", productRequest.getImageUrl());
+        map.put("price", productRequest.getPrice());
+        map.put("stock", productRequest.getStock());
+        map.put("description", productRequest.getDescription());
 
         Date now = new Date();
-        map.put("createdDate",now);
-        map.put("lastModifiedDate",now);
+        map.put("createdDate", now);
+        map.put("lastModifiedDate", now);
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        namedParameterJdbcTemplate.update(sql,new MapSqlParameterSource(map),keyHolder);
+        namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
 
         int productId = keyHolder.getKey().intValue();
 
@@ -91,23 +103,23 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public void updateProduct(Integer productId, ProductRequest productRequest) {
-        String sql ="UPDATE product SET product_name = :productName ,category=:category,image_url=:imageUrl," +
+        String sql = "UPDATE product SET product_name = :productName ,category=:category,image_url=:imageUrl," +
                 "price=:price , stock=:stock,description=:description,last_modified_date=:lastModifiedDate " +
                 "WHERE product_id = :productId";
 
-        Map<String,Object> map =  new HashMap<>();
-        map.put("productId",productId);
+        Map<String, Object> map = new HashMap<>();
+        map.put("productId", productId);
 
-        map.put("productName",productRequest.getProductName());
-        map.put("category",productRequest.getCategory().name());
-        map.put("imageUrl",productRequest.getImageUrl());
-        map.put("price",productRequest.getPrice());
-        map.put("stock",productRequest.getStock());
-        map.put("description",productRequest.getDescription());
+        map.put("productName", productRequest.getProductName());
+        map.put("category", productRequest.getCategory().name());
+        map.put("imageUrl", productRequest.getImageUrl());
+        map.put("price", productRequest.getPrice());
+        map.put("stock", productRequest.getStock());
+        map.put("description", productRequest.getDescription());
 
-        map.put("lastModifiedDate",new Date());
+        map.put("lastModifiedDate", new Date());
 
-        namedParameterJdbcTemplate.update(sql,map);
+        namedParameterJdbcTemplate.update(sql, map);
 
     }
 
@@ -115,10 +127,10 @@ public class ProductDaoImpl implements ProductDao {
     public void deleteProductById(Integer productId) {
         String sql = "DELETE FROM product WHERE product_id = :productId";
 
-        Map<String,Object> map =  new HashMap<>();
-        map.put("productId",productId);
+        Map<String, Object> map = new HashMap<>();
+        map.put("productId", productId);
 
-        namedParameterJdbcTemplate.update(sql,map);
+        namedParameterJdbcTemplate.update(sql, map);
 
     }
 }
