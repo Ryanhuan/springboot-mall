@@ -12,7 +12,7 @@ public class CreateOrderRequest {
         return buyItemList;
     }
 
-    public void setButItemList(List<BuyItem> getBuyItemList) {
+    public void setBuyItemList(List<BuyItem> getBuyItemList) {
         this.buyItemList = buyItemList;
     }
 }
